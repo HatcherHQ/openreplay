@@ -56,7 +56,7 @@ sudo apt update
 
 # setup docker
 info "Setting up Docker"
-sudo apt install docker.io docker-compose -y
+sudo apt install docker.io -y
 
 # enable docker without sudo
 sudo usermod -aG docker "${USER}" || true
@@ -115,8 +115,13 @@ case $yn in
 		exit 1;;
 esac
 
-sudo -E docker-compose --parallel 1 pull
-sudo -E docker-compose --profile migration up --force-recreate --build -d
+DOCKER_PLUGINS=/usr/local/lib/docker/cli-plugins
+sudo mkdir -p $DOCKER_PLUGINS
+sudo curl -SL https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64 -o $DOCKER_PLUGINS/docker-compose
+sudo chmod +x $DOCKER_PLUGINS/docker-compose
+
+sudo -E docker compose --parallel 1 pull
+sudo -E docker compose --profile migration up --force-recreate --build -d
 cp common.env common.env.bak
 echo "🎉🎉🎉  Done! 🎉🎉🎉"
 
